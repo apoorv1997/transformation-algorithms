@@ -253,6 +253,10 @@ if __name__ == "__main__":
     print("Dominating set ≤ k:", D)
     print("Distance to nearest dominating node for each node:")
     for x in sorted(G.nodes()):
+
+        if D is None:
+            print(f"Not possible with this k value: {k}")
+            sys.exit(1)
         if x in D:
             dmin = 0.0
         else:
