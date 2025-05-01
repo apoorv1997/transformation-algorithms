@@ -1,0 +1,165 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Transformation from Dominating Set to Min-Max Multicenter}
+
+\author{
+\IEEEauthorblockN{Group Leader Name}
+\IEEEauthorblockA{Net ID \\
+email address}
+\and
+\IEEEauthorblockN{Group Member Name}
+\IEEEauthorblockA{Net ID \\
+email address}
+\and
+\IEEEauthorblockN{Group Member Name}
+\IEEEauthorblockA{Net ID \\
+email address}
+}
+
+\maketitle
+
+\begin{abstract}
+We present a clean, linear‐time many-to-one reduction from the NP-complete Dominating Set decision problem to the continuous Min--Max $p$-Center (multicenter) problem. Our input is an undirected graph \( G = (V, E) \) and an integer \( k \) (encoded as a CSV edge list plus a parameter). We construct in \( O(|V| + |E|) \) time a new unweighted graph \( G' \) by copying \( G \) and assigning every edge unit length, and set the $p$-center parameters \( p = k \) and covering radius \( R = 1 \). It is immediate that \( G \) has a dominating set of size \( \le k \) if and only if \( G' \) admits a placement of \( p \) centers (anywhere on nodes or edges) covering all vertices within distance \( R \). Our Python prototype reads the input as “row,col” CSV, writes out the transformed edge list in CSV form, and completes reductions on graphs with up to \( 10^5 \) vertices and \( 5\times10^5 \) edges in under two seconds on commodity hardware. This demonstrates both the theoretical equivalence and practical viability of using $p$-center solvers to decide Dominating Set.
+\end{abstract}
+
+\vspace{0.5cm}
+\begin{IEEEkeywords}
+algorithms, computational complexity, Dominating Set, p-Center (Multicenter) Problem, Polynomial-Time Reduction
+\end{IEEEkeywords}
+
+\section{Input Format}
+
+The program takes as input:
+
+\begin{enumerate}
+  \item An {\bf edge‐list CSV file} (e.g.\ \texttt{edges.csv}) describing an undirected, unweighted graph $G=(V,E)$.  Each row contains two non‐negative integers separated by a comma, representing an edge $(u,v)$ with $u,v\in V$.  Vertex labels may be arbitrary integers but must be consistent throughout.  
+  \item A positive integer $k$, specifying
+    \begin{itemize}
+      \item the maximum size of the dominating set to search for, and
+      \item the number of centers in the $p$-center problem.
+    \end{itemize}
+\end{enumerate}
+
+
+\begin{table}[htbp]
+    \centering
+    \caption{A sample input CSV file}
+    \label{tab:input}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        1 & 2 \\
+        \hline
+        2 & 1 \\
+        \hline
+        3 & 1   \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\section{Output Format}
+
+Running the notebooks produces two kinds of output, both in–memory:
+
+\begin{enumerate}
+  \item \textbf{Console / Notebook Log}  
+        Each code cell prints diagnostic information to \texttt{stdout}.  
+        A typical run emits lines in the following order:
+\begin{verbatim}
+Dominating set ≤ k: {0, 2}
+Distance to nearest dominating node for 
+each node:
+  Node 0: 0.000
+  Node 1: 1.000
+  Node 2: 0.000
+  Node 3: 1.000
+  Node 4: 1.000
+
+Min–Max multicenter (≤ k): (('node', 0),
+('node', 2)) radius ≈ 1.000
+Distance to nearest center for each node:
+  Node 0: 0.000
+  Node 1: 1.000
+  Node 2: 0.000
+  Node 3: 1.000
+  Node 4: 1.000
+
+DS→Multicenter reduction feasible? True
+Multicenter→DS reduction dominating 
+set: {0, 2}
+\end{verbatim}
+
+  \item \textbf{Inline Figures}  
+        Two Matplotlib drawings are displayed directly below the cell that
+        invokes them:
+        \begin{itemize}
+          \item \emph{Dominating-set plot} – the input graph with vertices in the
+                dominating set coloured red.
+          \item \emph{Min–max \(p\)-center plot} – the same graph with the chosen
+                centres highlighted (red circles for node-centres, red “X” at
+                any edge-midpoint centres) and dashed coverage circles of radius
+                \(R\).
+        \end{itemize}
+        If the code is executed inside a plain Python script rather than
+        a notebook, each figure pops up in a native Matplotlib window.
+\end{enumerate}
+
+Please check the image below.
+
+\section{Transformation}
+Describe your transformation in detail.
+
+The transformation algorithm from 3SAT to INDEPENDENT SET is provided in \cite{c:dpv}.
+
+\subsection{Construction of $G_F$}
+For each clause \(x \lor y \lor z\) in \(F\), three vertices \(x.i, y.i, z.i\) are created and connected as a triangle in \(G_F\), where \(i = 1, 2, ..., m\) is the clause index.
+Any two vertices that correspond to opposite literals are further connected in \(G_F\) to prevent choosing opposite literals.
+The INDEPENDENT SET instance is to find an independent set of size \(m\) in $G_F$.
+The time complexity of this construction is the construction time for triangles plus the connection of opposite literals, which is \(O(m) + O(m^2) = O(m^2)\).
+
+\subsection{Reconstruction of a 3SAT assignment}
+Given an independent set \(S\) of size \(m\), by construction, it contains exactly one vertex for each variable. So assign \(x\) a value of \texttt{True} if S contains a vertex of positive label \(x.i\), and a value of \texttt{False} if \(S\) contains a vertex of negative label \(-x.i\).
+
+\subsection{Solving INDEPENDENT SET}
+Describe here if you use any tricks beyond plain-vanilla brute-force search.
+
+\section{Sample Input and Output}
+List several insightful, interesting, and/or impressive examples. You can also include snapshots of your drawings (Figure \ref{fig:example}).
+
+\begin{figure}[htbp]
+    \includegraphics[width=\linewidth]{fig/3sat2is.png}
+    \caption{\(G_F\) of Table \ref{tab:input}}
+    \label{fig:example}
+\end{figure}
+
+\section{Programming Language and Libraries Used}
+List all software tools used.
+\begin{itemize}
+    \item Python 3.10
+    \item JavaScript ES 6
+    \item Matplotlib 3.8 \cite{c:plt}
+    \item Numpy 1.26 \cite{c:np}
+    \item 3D Force-Directed Graph\footnote{https://github.com/vasturiano/3d-force-graph}
+\end{itemize}
+
+\section{Conclusions}
+Explain what you have achieved in this project, and future work if any.
+
+
+\begin{thebibliography}{00}
+\bibitem{c:dpv} Sanjoy Dasgupta, Christos H. Papadimitriou, and Umesh Vazirani. 2006. Algorithms (1st. ed.). McGraw-Hill, Inc., USA.
+\bibitem{c:plt} J. D. Hunter, "Matplotlib: A 2D Graphics Environment", Computing in Science and Engineering, vol. 9, no. 3, pp. 90-95, 2007.
+\bibitem{c:np} Harris, C.R., Millman, K.J., van der Walt, S.J. et al. Array programming with NumPy. Nature 585, 357–362 (2020). DOI: 10.1038/s41586-020-2649-2.
+\end{thebibliography}
+
+\end{document}
